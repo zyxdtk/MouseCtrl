@@ -31,10 +31,10 @@
           </svg>
         </div>
         <div>
-          <svg class="click-button" data-type="click" width="92px" height="92px" viewBox="114 318 92 92" versi xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <svg class="click-button" data-type="click" width="184px" height="184px" viewBox="114 318 184 184" versi xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
             <g id="Group-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(114.000000, 318.000000)">
-              <circle id="Oval-3" fill="#FFFFFF" cx="46" cy="46" r="37"></circle>
-              <circle id="Oval-3" fill-opacity="0.2" fill="#FFFFFF" cx="46" cy="46" r="46"></circle>
+              <circle id="Oval-3" fill="#FFFFFF" cx="92" cy="92" r="74"></circle>
+              <circle id="Oval-3" fill-opacity="0.2" fill="#FFFFFF" cx="92" cy="92" r="92"></circle>
             </g>
           </svg>
         </div>
@@ -50,35 +50,112 @@
         </svg>
       </div>
     </div>
+    <!--<div class="bottom row go">
+        <textarea id="text" name="text" ></textarea>
+        <input type="button" onclick="sendText()" value="SendText" />
+        <input type="button" onclick="clearText()" value="ClearText" />
+    </div>-->
     <script src="/javascripts/socket.io-1.4.5.js"></script>
     <script src="/javascripts/hammer.min.js"></script>
     <script>
       var socket = io();
       // 方向事件
-      var intervalId;
-      var elems = document.getElementsByClassName('go');
-      for(i = 0; i < elems.length; i++) {
-        var hammertime = new Hammer(elems[i]);
-        hammertime.on('press', function(ev) {
-          var type = ev.target.getAttribute('data-type');
-          if(intervalId) {
-            clearInterval(intervalId);
-          }
+      // var intervalId;
+      // var elems = document.getElementsByClassName('go');
+      // for(i = 0; i < elems.length; i++) {
+      //   var hammertime = new Hammer(elems[i]);
+      //   hammertime.on('press', function(ev) {
+      //     var type = ev.target.getAttribute('data-type');
+      //     if(intervalId) {
+      //       clearInterval(intervalId);
+      //     }
 
-          intervalId = setInterval(function(){
-            socket.emit('setMouse', {action: type});
-          }, 60);
-        });
-        hammertime.on('pressup', function(){
-          clearInterval(intervalId);
-        });
-      }
+      //     intervalId = setInterval(function(){
+      //       socket.emit('setMouse', {action: type});
+      //     }, 60);
+      //   });
+      //   hammertime.on('pressup', function(){
+      //     clearInterval(intervalId);
+      //   });
+      // }
+
+    
       // click 事件     
       var clickElem = document.getElementsByClassName('click-button')
       var clickEvent = new Hammer(clickElem[0]);
-      clickEvent.on('tap', function(ev){
+      clickEvent.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+      // clickEvent.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+      // clickEvent.get('pinch').set({ enable: true });
+      // clickEvent.get('rotate').set({ enable: true });
+
+      
+      var twoPointerTap = new Hammer.Tap({event: 'twoPointerTap', pointers: 2 });
+      clickEvent.add(twoPointerTap);
+      clickEvent.get('tap').set({ enable: false });
+      clickEvent.get('doubletap').set({ enable: false });
+      var doubleTap = new Hammer.Tap({event: 'doubleTap', taps: 2 });
+      var singleTap  = new Hammer.Tap({event: 'singleTap'});
+      clickEvent.add(doubleTap);
+      clickEvent.add(singleTap);
+      // var douibletap = clickEvent.get('doubletap');
+      // var tap = clickEvent.get('tap');
+    
+      doubleTap.recognizeWith(singleTap);
+      singleTap.requireFailure(doubleTap);
+
+      clickEvent.on('twoPointerTap', function(ev){
+        socket.emit('setMouse', {action: 'twoPointerTap'});
+      })
+      
+      clickEvent.on('doubleTap', function(ev){
+        socket.emit('setMouse', {action: 'doubleClick'});
+      })
+
+      clickEvent.on('singleTap', function(ev){
         socket.emit('setMouse', {action: 'click'});
       })
+
+      // clickEvent.on('press', function(ev){
+      //   socket.emit('setMouse', {action: 'press'});
+      // })
+
+      // clickEvent.on('pan', function(ev){
+      //   socket.emit('setMouse', {action: 'pan'});
+      // })
+
+      clickEvent.on('panleft', function(ev){
+        socket.emit('setMouse', {action: 'left'});
+      })
+
+      clickEvent.on('panright', function(ev){
+        socket.emit('setMouse', {action: 'right'});
+      })
+
+      clickEvent.on('panup', function(ev){
+        socket.emit('setMouse', {action: 'up'});
+      })
+
+      clickEvent.on('pandown', function(ev){
+        socket.emit('setMouse', {action: 'down'});
+      })
+
+      // clickEvent.on('pinch', function(ev){
+      //   socket.emit('setMouse', {action: 'pinch'});
+      // })
+
+      // clickEvent.on('rotate', function(ev){
+      //   socket.emit('setMouse', {action: 'rotate'});
+      // })
+
+      // 文本输入
+      // function sendText(){
+      //   var inputString = document.getElementById("text").value;
+      //   socket.emit('typeString', {action: inputString});
+      // }
+
+      // function clearText(){
+      //   document.getElementById("text").value = '';
+      // }
 
       socket.on('ready', function(data){
         console.log(data.status);

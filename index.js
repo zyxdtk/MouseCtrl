@@ -53,21 +53,33 @@ io.on('connection', function(socket){
     var prevMousePos = robot.getMousePos();
     switch(data.action){
       case "up":
-        robot.moveMouse(prevMousePos.x, prevMousePos.y - 10);
+        robot.moveMouse(prevMousePos.x, prevMousePos.y - 5);
         break;
       case "down":
-        robot.moveMouse(prevMousePos.x, prevMousePos.y + 10);
+        robot.moveMouse(prevMousePos.x, prevMousePos.y + 5);
         break;
       case "right":
-        robot.moveMouse(prevMousePos.x + 10, prevMousePos.y);
+        robot.moveMouse(prevMousePos.x + 5, prevMousePos.y);
         break;
       case "left":
-        robot.moveMouse(prevMousePos.x - 10, prevMousePos.y);
+        robot.moveMouse(prevMousePos.x - 5, prevMousePos.y);
         break;
       case "click":
         robot.mouseClick();
         break;
+      case "doubleClick":
+        robot.mouseClick("left", "true");
+        break;
+      case "rightClick":
+      case "twoPointerTap":
+        robot.mouseClick("right", "false");
+        break;
     }
+  });
+
+ socket.on('typeString', function(data){
+    console.log(data);
+    robot.typeString(data.action);
   });
 
   socket.on('disconnect', function(){

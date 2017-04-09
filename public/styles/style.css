@@ -76,3 +76,11 @@ header h1 {
 .bottom svg{
     flex: 1;
 }
+
+.bottom textarea{
+    flex: 1;
+}
+
+.bottom input{
+    flex: 1;
+}
